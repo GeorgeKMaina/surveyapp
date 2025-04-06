@@ -22,11 +22,10 @@ from dotenv import load_dotenv
 from openai import OpenAI
 import warnings
 warnings.filterwarnings("ignore", category=UserWarning, module='tqdm')
-
-
-import sys
-sys.path.append(r"C:\Users\Wangari Kimani\Downloads\powerpoint app")  # ✅ point to folder
 from text_utils import clean_text
+
+#import sys
+#sys.path.append(r"C:\Users\Wangari Kimani\Downloads\powerpoint app")  # ✅ point to folder
 
 
 
@@ -75,8 +74,8 @@ bert_model = joblib.load(model_path)
 topic_names = joblib.load("topic_label_map.pkl")
 
 # Load trained question type classifier
-classifier_model = joblib.load(r"C:\Users\Wangari Kimani\Downloads\powerpoint app\best_model.pkl")
-
+#classifier_model = joblib.load(r"C:\Users\Wangari Kimani\Downloads\powerpoint app\best_model.pkl")
+classifier_model = joblib.load("best_model.pkl")
 # Streamlit UI
 st.title("Survey Data Analysis & PowerPoint Report Generator")
 
