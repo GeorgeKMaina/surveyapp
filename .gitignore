@@ -1,0 +1,17 @@
+# -*- coding: utf-8 -*-
+"""
+Created on Sun Apr  6 18:32:11 2025
+
+@author: Wangari Kimani
+"""
+
+.env
+__pycache__/
+*.py[cod]
+.venv/
+.vscode/
+.idea/
+.streamlit/secrets.toml
+*.pptx
+*.csv
+
