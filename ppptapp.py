@@ -16,6 +16,7 @@ from io import BytesIO
 import re
 import os
 import joblib
+import gdown
 from bertopic import BERTopic
 from dotenv import load_dotenv
 from openai import OpenAI
@@ -30,22 +31,34 @@ from text_utils import clean_text
 
 
 # Load environment variables
-dotenv_path = r"C:\Users\Wangari Kimani\Downloads\powerpoint app\.env"
-load_dotenv(dotenv_path=dotenv_path)
+#dotenv_path = r"C:\Users\Wangari Kimani\Downloads\powerpoint app\.env"
+#load_dotenv(dotenv_path=dotenv_path)
 
 # Verify API key
-api_key = os.getenv("OPENAI_API_KEY")
-if not api_key:
-    raise ValueError("OPENAI_API_KEY not found. Check your .env file path.")
+#api_key = os.getenv("OPENAI_API_KEY")
+#if not api_key:
+#    raise ValueError("OPENAI_API_KEY not found. Check your .env file path.")
 
 # Initialize OpenAI client
-client = OpenAI(api_key=api_key)
+#client = OpenAI(api_key=api_key)
+
+# Load .env file ONLY if it exists (local environment)
+if os.path.exists(".env"):
+    load_dotenv()
+
+# Try to get the API key from environment or Streamlit secrets
+api_key = os.getenv("OPENAI_API_KEY") or st.secrets.get("OPENAI_API_KEY")
+
+# Raise an error if not found
+if not api_key:
+    raise ValueError("OPENAI_API_KEY not found. Make sure it's in your .env file (locally) or Streamlit secrets (deployment).")
+
+# Use the key with OpenAI
+
+openai.api_key = api_key
+
 
 # Load saved BERTopic model
-import gdown
-import os
-import joblib
-
 # Google Drive file ID
 file_id = "1vUjUBgqySAicfWYA7r7rn3RprVH3YKJy"
 url = f"https://drive.google.com/uc?id={file_id}"
