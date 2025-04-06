@@ -8,3 +8,6 @@ matplotlib
 scikit-learn
 python-pptx
 bertopic
+sentence-transformers
+hdbscan
+umap-learn
