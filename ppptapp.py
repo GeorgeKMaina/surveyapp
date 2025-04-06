@@ -19,13 +19,13 @@ import joblib
 import gdown
 from bertopic import BERTopic
 from dotenv import load_dotenv
-from openai import OpenAI
+import openai
 import warnings
 warnings.filterwarnings("ignore", category=UserWarning, module='tqdm')
 from text_utils import clean_text
 
 #import sys
-#sys.path.append(r"C:\Users\Wangari Kimani\Downloads\powerpoint app")  # ✅ point to folder
+#sys.path.append(r"C:\Users\Wangari Kimani\Downloads\powerpoint app")  # 
 
 
 
