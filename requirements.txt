@@ -1,0 +1,14 @@
+# -*- coding: utf-8 -*-
+"""
+Created on Sun Apr  6 19:51:47 2025
+
+@author: Wangari Kimani
+"""
+
+streamlit
+gdown
+joblib
+pandas
+python-dotenv
+openai
+# ...add any other packages you use
