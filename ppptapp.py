@@ -53,7 +53,6 @@ if not api_key:
     raise ValueError("OPENAI_API_KEY not found. Make sure it's in your .env file (locally) or Streamlit secrets (deployment).")
 
 # Use the key with OpenAI
-
 openai.api_key = api_key
 
 
