@@ -11,3 +11,4 @@ bertopic
 sentence-transformers
 hdbscan
 umap-learn
+openpyxl==3.1.2
