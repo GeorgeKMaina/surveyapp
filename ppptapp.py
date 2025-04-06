@@ -200,11 +200,17 @@ if uploaded_file:
         
         #prompt = f"Generate insights from the following survey data distribution: {responses.to_dict()}"
         try:
-            response = client.chat.completions.create(
+            #response = client.chat.completions.create(
+            #    model="gpt-3.5-turbo",
+             #   messages=[{"role": "user", "content": prompt}]
+            #)
+            #narrative = response.choices[0].message.content
+            response = openai.ChatCompletion.create(
                 model="gpt-3.5-turbo",
                 messages=[{"role": "user", "content": prompt}]
             )
-            narrative = response.choices[0].message.content
+            narrative = response.choices[0].message["content"]
+
         except Exception as e:
             narrative = f"Error generating narrative: {e}"
 
