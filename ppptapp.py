@@ -42,7 +42,23 @@ if not api_key:
 client = OpenAI(api_key=api_key)
 
 # Load saved BERTopic model
-bert_model = joblib.load("best_topic_model.pkl")
+import gdown
+import os
+import joblib
+
+# Google Drive file ID
+file_id = "1vUjUBgqySAicfWYA7r7rn3RprVH3YKJy"
+url = f"https://drive.google.com/uc?id={file_id}"
+
+# File name to save locally
+model_path = "best_topic_model.pkl"
+
+# Download if not already present
+if not os.path.exists(model_path):
+    gdown.download(url, model_path, quiet=False)
+
+# Load the BERT topic model
+bert_model = joblib.load(model_path)
 topic_names = joblib.load("topic_label_map.pkl")
 
 # Load trained question type classifier
