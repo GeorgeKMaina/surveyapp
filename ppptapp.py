@@ -26,12 +26,13 @@ import warnings
 warnings.filterwarnings("ignore", category=UserWarning, module='tqdm')
 
 import sys
-sys.path.append(r"C:\Users\Wangari Kimani\Downloads\powerpoint app")
+sys.path.append(r"text_utils.py")
 from text_utils import clean_text
 
 # Load environment variables
-dotenv_path = r"C:\Users\Wangari Kimani\Downloads\powerpoint app\.env"
-load_dotenv(dotenv_path=dotenv_path)
+from dotenv import load_dotenv
+load_dotenv()
+
 
 # Verify API key
 api_key = os.getenv("OPENAI_API_KEY")
@@ -42,7 +43,7 @@ if not api_key:
 client = OpenAI(api_key=api_key)
 
 # Load trained question type classifier
-classifier_model = joblib.load(r"C:\Users\Wangari Kimani\Downloads\powerpoint app\best_model.pkl")
+classifier_model = joblib.load(r"best_model.pkl")
 
 # Streamlit UI
 st.title("Survey Data Analysis & PowerPoint Report Generator")
