@@ -30,9 +30,7 @@ sys.path.append(r"text_utils.py")
 from text_utils import clean_text
 
 # Load environment variables
-from dotenv import load_dotenv
 load_dotenv()
-
 
 # Verify API key
 api_key = os.getenv("OPENAI_API_KEY")
@@ -69,9 +67,25 @@ if uploaded_file:
     question_texts = list(data.columns)
     cleaned_questions = [clean_text(q) for q in question_texts]
     predicted_labels = classifier_model.predict(cleaned_questions)
-
     normalized_labels = ["open-ended" if "open" in label.lower() else "closed-ended" for label in predicted_labels]
     question_types = dict(zip(question_texts, normalized_labels))
+
+    # Allow user to correct misclassified open-ended questions
+    review_df = pd.DataFrame({
+        "Question": question_texts,
+        "Predicted Type": normalized_labels
+    })
+    st.subheader("\U0001F50D Review Question Classification")
+    st.write("Below are the model's classifications. You can correct any misclassified open-ended questions:")
+
+    corrected = st.multiselect(
+        "Select questions that are actually open-ended but were misclassified:",
+        options=review_df[review_df["Predicted Type"] == "closed-ended"]["Question"].tolist()
+    )
+
+    for q in corrected:
+        question_types[q] = "open-ended"
+
     open_ended = [q for q, label in question_types.items() if label == 'open-ended']
     closed_ended = [q for q, label in question_types.items() if label == 'closed-ended']
 
@@ -125,12 +139,11 @@ if uploaded_file:
         responses = data[question].value_counts(normalize=True) * 100
         closed_insights[question] = responses.to_dict()
 
-    # Start building the PowerPoint
+    # PowerPoint generation
     prs = Presentation()
     prs.slide_width = Inches(13.33)
     prs.slide_height = Inches(7.5)
 
-    # Executive Summary Slide
     slide = prs.slides.add_slide(prs.slide_layouts[5])
     slide.shapes.title.text = "Executive Summary"
 
@@ -162,17 +175,14 @@ if uploaded_file:
     textbox = slide.shapes.add_textbox(Inches(1), Inches(1.5), Inches(11), Inches(5.5))
     text_frame = textbox.text_frame
     text_frame.clear()
-    p = text_frame.paragraphs[0]
-    p.text = summary_text
+    text_frame.text = summary_text
     text_frame.word_wrap = True
     text_frame.auto_size = True
 
-    # Closed-ended Question Slides
     for question in closed_ended:
         slide = prs.slides.add_slide(prs.slide_layouts[5])
         slide.shapes.title.text = question
         responses = data[question].value_counts(normalize=True) * 100
-
         if responses.empty:
             responses = pd.Series([0], index=['No Data'])
 
@@ -206,12 +216,10 @@ if uploaded_file:
         textbox = slide.shapes.add_textbox(Inches(1), Inches(4.2), Inches(10.5), Inches(2.5))
         text_frame = textbox.text_frame
         text_frame.clear()
-        p = text_frame.paragraphs[0]
-        p.text = narrative
+        text_frame.text = narrative
         text_frame.word_wrap = True
         text_frame.auto_size = True
 
-    # Open-ended Question Slides
     for question, topics in topic_freqs.items():
         slide = prs.slides.add_slide(prs.slide_layouts[5])
         slide.shapes.title.text = question
@@ -256,29 +264,25 @@ if uploaded_file:
                 textbox = slide.shapes.add_textbox(Inches(1), Inches(4.2), Inches(10.5), Inches(2.5))
                 text_frame = textbox.text_frame
                 text_frame.clear()
-                p = text_frame.paragraphs[0]
-                p.text = narrative
+                text_frame.text = narrative
                 text_frame.word_wrap = True
                 text_frame.auto_size = True
-
                 continue
 
         tb = slide.shapes.add_textbox(Inches(1), Inches(2), Inches(10.5), Inches(4))
         text_frame = tb.text_frame
         text_frame.clear()
-        p = text_frame.paragraphs[0]
-        p.text = "No topics generated or too few responses."
+        text_frame.text = "No topics generated or too few responses."
         text_frame.word_wrap = True
         text_frame.auto_size = True
 
-    # Export PPTX
     ppt_stream = BytesIO()
     prs.save(ppt_stream)
     ppt_stream.seek(0)
 
-    st.success("✅ Analysis complete! Download your PowerPoint report below.")
+    st.success("\u2705 Analysis complete! Download your PowerPoint report below.")
     st.download_button(
-        "📥 Download PowerPoint Report",
+        "\U0001F4E5 Download PowerPoint Report",
         ppt_stream,
         "survey_report.pptx",
         "application/vnd.openxmlformats-officedocument.presentationml.presentation"
