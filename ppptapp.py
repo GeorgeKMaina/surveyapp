@@ -89,6 +89,14 @@ if uploaded_file:
     open_ended = [q for q, label in question_types.items() if label == 'open-ended']
     closed_ended = [q for q, label in question_types.items() if label == 'closed-ended']
 
+    # Show final classification table
+    final_df = pd.DataFrame({
+        "Question": question_texts,
+        "Final Type": [question_types[q] for q in question_texts]
+    })
+    st.subheader("\U0001F4BE Final Classification Results")
+    st.dataframe(final_df)
+
     def preprocess_text(text):
         if isinstance(text, str):
             text = text.lower()
