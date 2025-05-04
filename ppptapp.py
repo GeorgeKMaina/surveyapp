@@ -17,6 +17,7 @@ import re
 import os
 import joblib
 from bertopic import BERTopic
+from bertopic.representation import KeyBERTInspired
 from sentence_transformers import SentenceTransformer
 from umap import UMAP
 from hdbscan import HDBSCAN
@@ -70,14 +71,10 @@ if uploaded_file:
     normalized_labels = ["open-ended" if "open" in label.lower() else "closed-ended" for label in predicted_labels]
     question_types = dict(zip(question_texts, normalized_labels))
 
-    # Allow user to correct misclassified open-ended questions
-    review_df = pd.DataFrame({
-        "Question": question_texts,
-        "Predicted Type": normalized_labels
-    })
+    # Manual correction
+    review_df = pd.DataFrame({"Question": question_texts, "Predicted Type": normalized_labels})
     st.subheader("\U0001F50D Review Question Classification")
     st.write("Below are the model's classifications. You can correct any misclassified open-ended questions:")
-
     corrected = st.multiselect(
         "Select questions that are actually open-ended but were misclassified:",
         options=review_df[review_df["Predicted Type"] == "closed-ended"]["Question"].tolist()
@@ -89,11 +86,7 @@ if uploaded_file:
     open_ended = [q for q, label in question_types.items() if label == 'open-ended']
     closed_ended = [q for q, label in question_types.items() if label == 'closed-ended']
 
-    # Show final classification table
-    final_df = pd.DataFrame({
-        "Question": question_texts,
-        "Final Type": [question_types[q] for q in question_texts]
-    })
+    final_df = pd.DataFrame({"Question": question_texts, "Final Type": [question_types[q] for q in question_texts]})
     st.subheader("\U0001F4BE Final Classification Results")
     st.dataframe(final_df)
 
@@ -118,12 +111,14 @@ if uploaded_file:
                 umap_model = UMAP(n_neighbors=15, n_components=5, min_dist=0.1, random_state=42)
                 hdbscan_model = HDBSCAN(min_cluster_size=5, prediction_data=True)
                 vectorizer_model = TfidfVectorizer(max_features=1000, min_df=1, max_df=1.0, stop_words="english")
+                representation_model = KeyBERTInspired()
 
                 dynamic_topic_model = BERTopic(
                     embedding_model=embedding_model,
                     umap_model=umap_model,
                     hdbscan_model=hdbscan_model,
                     vectorizer_model=vectorizer_model,
+                    representation_model=representation_model,
                     nr_topics=8,
                     calculate_probabilities=False,
                     verbose=False
@@ -133,7 +128,7 @@ if uploaded_file:
 
                 topic_counts = pd.Series(topics).value_counts().sort_values(ascending=False)
                 filtered = {
-                    " / ".join([word for word, _ in dynamic_topic_model.get_topic(topic)[:3]]): count
+                    dynamic_topic_model.get_topic_info().loc[topic, 'Name']: count
                     for topic, count in topic_counts.items()
                     if topic != -1 and count >= 3
                 }
@@ -147,7 +142,6 @@ if uploaded_file:
         responses = data[question].value_counts(normalize=True) * 100
         closed_insights[question] = responses.to_dict()
 
-    # PowerPoint generation
     prs = Presentation()
     prs.slide_width = Inches(13.33)
     prs.slide_height = Inches(7.5)
@@ -295,3 +289,4 @@ if uploaded_file:
         "survey_report.pptx",
         "application/vnd.openxmlformats-officedocument.presentationml.presentation"
     )
+
