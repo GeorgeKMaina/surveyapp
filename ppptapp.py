@@ -64,14 +64,12 @@ if uploaded_file:
     st.write("Dataset Preview:")
     st.dataframe(data.head())
 
-    # Classify question types
     question_texts = list(data.columns)
     cleaned_questions = [clean_text(q) for q in question_texts]
     predicted_labels = classifier_model.predict(cleaned_questions)
     normalized_labels = ["open-ended" if "open" in label.lower() else "closed-ended" for label in predicted_labels]
     question_types = dict(zip(question_texts, normalized_labels))
 
-    # Manual correction
     review_df = pd.DataFrame({"Question": question_texts, "Predicted Type": normalized_labels})
     st.subheader("\U0001F50D Review Question Classification")
     st.write("Below are the model's classifications. You can correct any misclassified open-ended questions:")
@@ -125,11 +123,10 @@ if uploaded_file:
                 )
 
                 topics, _ = dynamic_topic_model.fit_transform(responses)
-
-                topic_counts = pd.Series(topics).value_counts().sort_values(ascending=False)
+                topic_info_df = dynamic_topic_model.get_topic_info()
                 filtered = {
-                    dynamic_topic_model.get_topic_info().loc[topic, 'Name']: count
-                    for topic, count in topic_counts.items()
+                    topic_info_df.query("Topic == @topic")["Name"].values[0]: count
+                    for topic, count in pd.Series(topics).value_counts().items()
                     if topic != -1 and count >= 3
                 }
                 topic_freqs[question] = filtered if filtered else {"No dominant topics": 1}
@@ -289,4 +286,3 @@ if uploaded_file:
         "survey_report.pptx",
         "application/vnd.openxmlformats-officedocument.presentationml.presentation"
     )
-
